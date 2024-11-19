@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokedex</title>
+    <link rel="icon" href="./img/icons/pokeball.png" type="image/png">
+    <link rel="stylesheet" href="fonts.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="bgColors.css">
+</head>
+
+<body onload="init()">
+
+    <header>
+        <div class="logo-container">
+            <span class="poke-text">P <img src="./img/icons/pokeballstraight.png">ke<span
+                    class="dex-text">Dex</span></span>
+        </div>
+        <input id="searchField" class="search" type="text" placeholder="search Pokemon" onkeyup="searchPokemon()">
+        <button class="theme-button" id="toggleThemeButton" onclick="toggleTheme()"><img id="themeIcon"
+                src="./img/theme_icons/sonne (2).png" alt=""></button>
+    </header>
+
+    <div id="loadingScreen" class="loading-overlay">
+        <div class="loading">
+            <img src="./img/icons/pokeballstraight.png" alt="">
+            <div>
+                <span class="loading-text">Loading...</span>
+            </div>
+            <div class="circle"></div>
+        </div>
+    </div>
+
+    <main id="content" class="main">
+    </main>
+
+    <div onclick="closeFullscreen(event)" id="fullscreen" class="cards-fullscreen d-none">
+    </div>
+
+    <div class="load-more">
+        <button onclick="loadMore()" class="load-more-button">Load more</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="chart.js"></script>
+    <script src="htmlTemplates.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
