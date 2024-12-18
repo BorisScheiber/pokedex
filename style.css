@@ -264,6 +264,22 @@ header {
 .fullscreen-img {
   height: 100%;
   filter: drop-shadow(0 0 8px var(--color-text));
+  animation: alive 3s ease-in-out forwards;
+  will-change: transform;
+  transform-origin: center;
+}
+
+@keyframes alive {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  50%,
+  100% {
+    transform: translateY(0) scale(1.05);
+  }
 }
 
 .cards img {
@@ -544,6 +560,54 @@ body.dark-mode::-webkit-scrollbar-thumb:active {
 
 .dark-mode .close-button {
   background: white;
+}
+
+@media (max-height: 1100px) {
+  .imagebox-fs {
+    height: 300px;
+  }
+  .stats-container {
+    height: 230px;
+  }
+  :root {
+    --prevnex-button-size: 45px;
+  }
+  .pokemon-id-fs {
+    height: 55px;
+    width: 55px;
+  }
+  .h5-fs {
+    font-size: 26px;
+  }
+  .close-button {
+    height: 36px;
+    width: 36px;
+  }
+  .h2-fs {
+    font-size: 46px;
+  }
+}
+
+@media (max-height: 930px) {
+  .imagebox-fs {
+    height: 260px;
+  }
+  .hw-container {
+    padding: 8px;
+  }
+  .h2-fs {
+    font-size: 44px;
+  }
+  .h5-fs {
+    font-size: 24px;
+  }
+  .pokemon-id-fs {
+    height: 50px;
+    width: 50px;
+  }
+  .stats-container {
+    height: 220px;
+  }
 }
 
 @media (max-width: 700px) {

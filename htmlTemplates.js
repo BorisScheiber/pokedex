@@ -1,3 +1,13 @@
+/**
+ * Generates the HTML for a Pokémon card.
+ *
+ * @param {number} p - The Pokémon ID.
+ * @param {string} nameUpperCase - The name of the Pokémon in uppercase.
+ * @param {string} image - The URL of the Pokémon's image.
+ * @param {number} xp - The experience points of the Pokémon.
+ * @param {string} classbg - The background class for the card.
+ * @returns {string} The HTML string for the Pokémon card.
+ */
 function generatePokemonCardHtml(p, nameUpperCase, image, xp, classbg) {
   return /*HTML*/ `
   <div id="pokemon${p}" class="cards bg-${classbg}" onclick="openFullscreen(${p})">
@@ -23,6 +33,13 @@ function generatePokemonCardHtml(p, nameUpperCase, image, xp, classbg) {
 }
 
 
+/**
+ * Generates HTML for displaying Pokémon types.
+ *
+ * @param {string} type0 - The primary type of the Pokémon.
+ * @param {string} [type1] - The secondary type of the Pokémon (optional).
+ * @returns {string} The generated HTML string for the Pokémon types.
+ */
 function generateCardTypeHtml(type0, type1) {
   let html = /*HTML*/ `
       <div class="first-type">
@@ -40,6 +57,18 @@ function generateCardTypeHtml(type0, type1) {
 }
 
 
+/**
+ * Generates the HTML for a fullscreen card displaying Pokémon details.
+ *
+ * @param {number} p - The Pokémon ID.
+ * @param {string} nameUpperCase - The name of the Pokémon in uppercase.
+ * @param {string} image - The URL of the Pokémon image.
+ * @param {number} xp - The experience points of the Pokémon.
+ * @param {string} classbg - The background class for the card.
+ * @param {number} height - The height of the Pokémon in meters.
+ * @param {number} weight - The weight of the Pokémon in kilograms.
+ * @returns {string} The HTML string for the fullscreen card.
+ */
 function generateFullscreenHtml(p,nameUpperCase,image,xp,classbg,height,weight) {
   return /*HTML*/ `
     <div class="card-fullscreen bg-${classbg}">
@@ -88,6 +117,13 @@ function generateFullscreenHtml(p,nameUpperCase,image,xp,classbg,height,weight) 
 }
 
 
+/**
+ * Generates HTML for displaying Pokémon types in fullscreen mode.
+ *
+ * @param {string} type0 - The primary type of the Pokémon.
+ * @param {string} [type1] - The secondary type of the Pokémon (optional).
+ * @returns {string} The generated HTML string.
+ */
 function generateCardTypeFullscreenHtml(type0, type1) {
   let html = /*HTML*/ `
       <div class="first-type first-type-fs">

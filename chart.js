@@ -1,3 +1,13 @@
+/**
+ * Renders a statistics chart for a given Pokémon.
+ *
+ * This function retrieves the statistics of the specified Pokémon,
+ * configures the chart's default font settings, and creates and
+ * renders the chart in the specified canvas element. It also handles
+ * window resizing and updates the chart's font size accordingly.
+ *
+ * @param {Object} pokemon - The Pokémon object containing the data to be displayed in the chart.
+ */
 function renderStatsChart(pokemon) {
   let stats = getPokemonStats(pokemon);
   let ctx = document.getElementById("statsChart");
@@ -13,6 +23,20 @@ function renderStatsChart(pokemon) {
 }
 
 
+/**
+ * Extracts and returns the base stats of a given Pokémon.
+ *
+ * @param {Object} pokemon - The Pokémon object containing stats.
+ * @param {Array} pokemon.stats - An array of stat objects.
+ * @param {Object} pokemon.stats[].base_stat - The base stat value.
+ * @returns {Object} An object containing the base stats of the Pokémon.
+ * @returns {number} return.hp - The base HP stat.
+ * @returns {number} return.attack - The base Attack stat.
+ * @returns {number} return.defense - The base Defense stat.
+ * @returns {number} return.spAttack - The base Special Attack stat.
+ * @returns {number} return.spDefense - The base Special Defense stat.
+ * @returns {number} return.speed - The base Speed stat.
+ */
 function getPokemonStats(pokemon) {
   return {
     hp: pokemon.stats[0].base_stat,
@@ -25,6 +49,19 @@ function getPokemonStats(pokemon) {
 }
 
 
+/**
+ * Creates a bar chart using Chart.js library.
+ *
+ * @param {CanvasRenderingContext2D} ctx - The rendering context of the canvas element where the chart will be drawn.
+ * @param {Object} stats - An object containing the statistics to be displayed in the chart.
+ * @param {number} stats.hp - The HP stat value.
+ * @param {number} stats.attack - The Attack stat value.
+ * @param {number} stats.defense - The Defense stat value.
+ * @param {number} stats.spAttack - The Special Attack stat value.
+ * @param {number} stats.spDefense - The Special Defense stat value.
+ * @param {number} stats.speed - The Speed stat value.
+ * @returns {Chart} The created Chart.js instance.
+ */
 function createChart(ctx, stats) {
   return new Chart(ctx, {
     type: "bar",
@@ -117,6 +154,11 @@ function createChart(ctx, stats) {
 }
 
 
+/**
+ * Updates the font size of the chart based on the window's inner width.
+ * 
+ * @param {Object} chart - The chart instance to update.
+ */
 function updateChartFontSize(chart) {
   let width = window.innerWidth;
   let fontSize;
@@ -132,6 +174,11 @@ function updateChartFontSize(chart) {
 }
 
 
+/**
+ * Attaches a resize event listener to the window that updates the chart's font size when the window is resized.
+ *
+ * @param {Object} chart - The chart object that needs its font size updated on window resize.
+ */
 function windowResize(chart) {
   window.onresize = function () {
     updateChartFontSize(chart);
