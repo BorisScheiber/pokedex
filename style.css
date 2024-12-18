@@ -483,6 +483,12 @@ header {
   cursor: pointer;
 }
 
+.next-button img,
+.previous-button img {
+  object-fit: cover;
+  width: 100%;
+}
+
 .next-button img:hover,
 .previous-button img:hover {
   transform: scale(1.2);
