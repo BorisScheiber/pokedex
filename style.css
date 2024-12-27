@@ -505,6 +505,13 @@ header {
   top: var(--prevnex-button-pos-y);
 }
 
+.no-results {
+  color: var(--color-red);
+  font-size: 20px;
+  text-align: center;
+  margin-top: 10px;
+}
+
 .d-none {
   display: none;
 }

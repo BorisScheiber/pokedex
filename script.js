@@ -12,26 +12,48 @@ function init() {
 
 
 /**
- * Fetches Pokémon data from the PokéAPI and renders Pokémon cards.
- * Iterates through Pokémon IDs from 1 to the current Pokémon ID, fetches data for each Pokémon,
- * stores the data in the `data` array, and renders a Pokémon card for each.
- * Finally, closes the loading screen.
+ * Fetches Pokémon data from the PokéAPI and renders Pokémon cards sequentially.
+ *
+ * This function fetches data for Pokémon IDs starting from 1 up to the current Pokémon index.
+ * The data is fetched in parallel using `Promise.all` and then rendered sequentially for a smooth user experience.
+ * Finally, it closes the loading screen.
  *
  * @async
  * @function getPokemons
  * @returns {Promise<void>} A promise that resolves when all Pokémon data has been fetched and rendered.
  */
 async function getPokemons() {
+  const fetchPromises = [];
   for (let p = 1; p < currentPokemon; p++) {
     let url = `https://pokeapi.co/api/v2/pokemon/${p}`;
-    let response = await fetch(url);
-    let pokemonData = await response.json();
-
-    data.push(pokemonData);
-
-    renderPokemonCard(p, pokemonData);
+    fetchPromises.push(fetch(url).then(response => response.json()));
   }
+  const pokemonDataArray = await Promise.all(fetchPromises);
+
+  await renderPokemonCardsSequentially(pokemonDataArray, 1);
   closeLoadingScreen();
+}
+
+
+/**
+ * Renders Pokémon cards sequentially with a slight delay between each rendering.
+ *
+ * This function takes an array of Pokémon data objects and renders each Pokémon card one by one,
+ * adding the data to the global `data` array and applying a delay for visual effect.
+ *
+ * @async
+ * @function renderPokemonCardsSequentially
+ * @param {Object[]} pokemonDataArray - An array of Pokémon data objects to be rendered.
+ * @param {number} startIndex - The starting index for rendering (used to calculate Pokémon IDs).
+ * @returns {Promise<void>} A promise that resolves when all Pokémon cards have been rendered.
+ */
+async function renderPokemonCardsSequentially(pokemonDataArray, startIndex) {
+  for (let p = 0; p < pokemonDataArray.length; p++) {
+    const pokemonData = pokemonDataArray[p];
+    data.push(pokemonData);
+    renderPokemonCard(startIndex + p, pokemonData);
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
 }
 
 
@@ -99,41 +121,76 @@ function addCardType(p, pokemonData) {
 
 /**
  * Filters and displays Pokémon cards based on the search input.
- * If the search input has 3 or more characters, it shows the search results.
- * Otherwise, it displays all Pokémon cards.
+ * If the search input has 3 or more characters, it calls `showSearchResults` to display matching Pokémon cards.
+ * Otherwise, it resets the search and shows all Pokémon cards.
  */
 function searchPokemon() {
   let searchField = document.getElementById("searchField").value.toLowerCase();
   let pokemonCards = document.querySelectorAll(".cards");
+  let noResultsMessage = document.getElementById("noResultsMessage");
 
   if (searchField.length >= 3) {
-    showSearchResults(searchField, pokemonCards);
+    showSearchResults(searchField, pokemonCards, noResultsMessage);
   } else {
     for (let i = 0; i < pokemonCards.length; i++) {
       pokemonCards[i].style.display = "flex";
     }
+    noResultsMessage.classList.add("d-none");
   }
 }
 
 
 /**
  * Filters and displays Pokémon cards based on the search field input.
+ * It hides Pokémon cards that do not match the search term and shows those that do.
+ * Updates the visibility of the "No Pokémon found" message based on the results.
  *
- * @param {string} searchField - The search term used to filter Pokémon cards.
- * @param {HTMLElement[]} pokemonCards - An array of HTML elements representing Pokémon cards.
+ * @param {string} searchField - The search term entered by the user.
+ * @param {NodeListOf<HTMLElement>} pokemonCards - A list of Pokémon card elements.
+ * @param {HTMLElement} noResultsMessage - The HTML element for the "No Pokémon found" message.
  */
-function showSearchResults(searchField, pokemonCards) {
+function showSearchResults(searchField, pokemonCards, noResultsMessage) {
+  let found = false;
+
   for (let i = 0; i < pokemonCards.length; i++) {
     const pokemonCard = pokemonCards[i];
-
     let name = document.getElementById(`pokemonName${i + 1}`).innerText.toLowerCase();
 
     if (name.includes(searchField)) {
       pokemonCard.style.display = "flex";
+      found = true;
     } else {
       pokemonCard.style.display = "none";
     }
   }
+  toggleResultsMessage(noResultsMessage, found);
+}
+
+
+/**
+ * Toggles the visibility of the "No Pokémon found" message based on search results.
+ *
+ * @param {HTMLElement} noResultsMessage - The HTML element for the "No Pokémon found" message.
+ * @param {boolean} found - Indicates whether any Pokémon matches the search criteria.
+ */
+function toggleResultsMessage(noResultsMessage, found) {
+  if (!found) {
+    noResultsMessage.classList.remove("d-none");
+  } else {
+    noResultsMessage.classList.add("d-none");
+  }
+}
+
+
+/**
+ * Clears the search field and resets the Pokémon card display.
+ * This function clears the search input, restores all Pokémon cards to a visible state,
+ * and hides the "No Pokémon found" message.
+ */
+function clearSearchField() {
+  let searchField = document.getElementById("searchField");
+  searchField.value = "";
+  searchPokemon();
 }
 
 
@@ -145,6 +202,7 @@ function showSearchResults(searchField, pokemonCards) {
  * @returns {Promise<void>} A promise that resolves when the loading process is complete.
  */
 async function loadMore() {
+  clearSearchField();
   showLoadingScreen();
   await fetchMorePokemons();
   closeLoadingScreen();
@@ -152,26 +210,26 @@ async function loadMore() {
 
 
 /**
- * Fetches more Pokémon data from the PokéAPI and renders their cards.
+ * Fetches the next batch of Pokémon data from the PokéAPI and renders their cards sequentially.
  * 
  * This function fetches data for the next 40 Pokémon starting from the current Pokémon index.
- * It updates the global `data` array with the fetched Pokémon data and calls `renderPokemonCard`
- * to display each Pokémon.
- * 
+ * The data is fetched in parallel using `Promise.all` and then rendered sequentially
+ * with a slight delay for a smooth user experience.
+ *
  * @async
  * @function fetchMorePokemons
- * @returns {Promise<void>} A promise that resolves when all Pokémon data has been fetched and rendered.
+ * @returns {Promise<void>} A promise that resolves when all Pokémon data has been fetched, rendered, and the current index is updated.
  */
 async function fetchMorePokemons() {
   const nextPokemon = currentPokemon + 40;
+  const fetchPromises = [];
 
   for (let p = currentPokemon; p < nextPokemon; p++) {
     let url = `https://pokeapi.co/api/v2/pokemon/${p}`;
-    let response = await fetch(url);
-    let pokemonData = await response.json();
-    data.push(pokemonData);
-    renderPokemonCard(p, pokemonData);
+    fetchPromises.push(fetch(url).then(response => response.json()));
   }
+  const pokemonDataArray = await Promise.all(fetchPromises);
+  await renderPokemonCardsSequentially(pokemonDataArray, currentPokemon);
   currentPokemon = nextPokemon;
 }
 
@@ -187,39 +245,18 @@ function openFullscreen(p) {
   let fullScreenContent = document.getElementById("fullscreen");
 
   showFullscreen(fullScreenContent);
-
   fullScreenContent.innerHTML = generateFullscreenHtml(p,object.nameUpperCase,object.image,object.xp,object.classbg,object.height,object.weight);
   addCardTypeFullscreen(p, pokemon);
   renderStatsChart(pokemon);
-
   updateCloseIconTheme();
 }
 
 
 /**
- * Transforms a Pokémon object into a fullscreen display object.
+ * Transforms a Pokémon object into a structured object for fullscreen display.
  *
- * @param {Object} pokemon - The Pokémon object.
- * @param {string} pokemon.name - The name of the Pokémon.
- * @param {Object} pokemon.sprites - The sprites object containing image URLs.
- * @param {Object} pokemon.sprites.other - The other sprites object.
- * @param {Object} pokemon.sprites.other.home - The home sprites object.
- * @param {string} pokemon.sprites.other.home.front_default - The URL of the Pokémon's front default image.
- * @param {number} pokemon.base_experience - The base experience of the Pokémon.
- * @param {Array} pokemon.types - The array of types the Pokémon has.
- * @param {Object} pokemon.types[0] - The first type object.
- * @param {Object} pokemon.types[0].type - The type details object.
- * @param {string} pokemon.types[0].type.name - The name of the first type.
- * @param {number} pokemon.height - The height of the Pokémon in decimetres.
- * @param {number} pokemon.weight - The weight of the Pokémon in hectograms.
- * @returns {Object} The transformed Pokémon object for fullscreen display.
- * @returns {string} return.name - The name of the Pokémon.
- * @returns {string} return.nameUpperCase - The name of the Pokémon with the first letter capitalized.
- * @returns {string} return.image - The URL of the Pokémon's front default image.
- * @returns {number} return.xp - The base experience of the Pokémon.
- * @returns {string} return.classbg - The name of the first type of the Pokémon.
- * @returns {number} return.height - The height of the Pokémon in meters.
- * @returns {number} return.weight - The weight of the Pokémon in kilograms.
+ * @param {Object} pokemon - The Pokémon object containing its data.
+ * @returns {Object} An object with transformed Pokémon data, including name, image, type, and dimensions.
  */
 function getFullscreenObject(pokemon) {
   return {
@@ -312,18 +349,9 @@ function addCardTypeFullscreen(p, pokemon) {
 
 
 /**
- * Toggles the theme of the webpage between light mode and dark mode.
- * 
- * This function toggles the "dark-mode" class on the body element and updates
- * the theme icon accordingly. It also stores the current theme preference in
- * localStorage.
- * 
- * - If the "dark-mode" class is present on the body element, the theme is set
- *   to dark mode, the theme icon is changed to a moon icon, and the theme
- *   preference is saved in localStorage.
- * - If the "dark-mode" class is not present on the body element, the theme is
- *   set to light mode, the theme icon is changed to a sun icon, and the theme
- *   preference is removed from localStorage.
+ * Toggles the webpage theme between light and dark mode.
+ * Updates the "dark-mode" class on the body, changes the theme icon, 
+ * and saves the preference in localStorage.
  */
 function toggleTheme() {
   let body = document.querySelector("body");
